@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "🔍 Running design system validation..."
+
+npm run build
+
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed. Commit blocked."
+  exit 1
+fi
+
+echo "✅ Design system validated"
