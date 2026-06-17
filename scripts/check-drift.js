@@ -42,10 +42,11 @@ componentDirs.forEach((component) => {
 
     // Allow both semantic and core tokens
     const isSizeToken = entry.token.startsWith("size.");
-    const isColorToken = entry.token.startsWith("color.");
-    const isCoreToken = entry.token.startsWith("core.");
+const isColorToken = entry.token.startsWith("color.");
+const isCoreToken = entry.token.startsWith("core.");
+const isSpaceToken = entry.token.startsWith("space."); // ✅ ADD THIS
 
-    if (!isSizeToken && !isColorToken && !isCoreToken) {
+if (!isSizeToken && !isColorToken && !isCoreToken && !isSpaceToken) {
       console.error(
         `Unknown token "${entry.token}" in ${component}`
       );
