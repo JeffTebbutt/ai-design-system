@@ -1,0 +1,99 @@
+{
+    "metadata": {
+        "exportedAt": "2026-06-17T04:03:19.722Z",
+        "componentName": "state-layer",
+        "totalElements": 2,
+        "nestingDepth": 2,
+        "plugin": "Figma to JSON Exporter"
+    },
+    "designTokens": {
+        "colors": {
+            "color-rgb(27, 124, 83)": "rgb(27, 124, 83)",
+            "color-rgb(255, 255, 255)": "rgb(255, 255, 255)"
+        },
+        "fonts": {
+            "euclid-circular-a": {
+                "family": "Euclid Circular A",
+                "sizes": {
+                    "size-16": "16px"
+                },
+                "weights": {
+                    "weight-500": "500"
+                }
+            }
+        },
+        "spacing": {
+            "padding-right-24": "24px",
+            "padding-left-24": "24px",
+            "gap-4": "4px"
+        },
+        "effects": {
+            "shadow-0-0": {
+                "x": 0,
+                "y": 0,
+                "blur": 0,
+                "color": "rgb(255, 255, 255)"
+            }
+        }
+    },
+    "structure": {
+        "name": "state-layer",
+        "type": "FRAME",
+        "size": {
+            "w": 99,
+            "h": 48
+        },
+        "styles": {
+            "bg": "rgb(27, 124, 83)",
+            "radius": 1000,
+            "shadow": {
+                "x": 0,
+                "y": 0,
+                "blur": 0,
+                "color": "rgb(255, 255, 255)"
+            },
+            "layout": {
+                "direction": "row",
+                "gap": 4,
+                "align": {
+                    "main": "center",
+                    "cross": "center"
+                },
+                "padding": [
+                    0,
+                    24,
+                    0,
+                    24
+                ]
+            }
+        },
+        "children": [
+            {
+                "name": "label-text",
+                "type": "TEXT",
+                "size": {
+                    "w": 51,
+                    "h": 11
+                },
+                "content": "Action",
+                "styles": {
+                    "bg": "rgb(255, 255, 255)",
+                    "text": {
+                        "family": "Euclid Circular A",
+                        "size": 16,
+                        "weight": "500",
+                        "align": "center"
+                    }
+                }
+            }
+        ]
+    },
+    "summary": {
+        "components": 0,
+        "instances": 0,
+        "frames": 1,
+        "texts": 1,
+        "hasAutoLayout": true,
+        "hasEffects": true
+    }
+}
