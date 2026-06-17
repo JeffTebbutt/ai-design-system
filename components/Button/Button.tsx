@@ -7,7 +7,7 @@ function resolveToken(name: string) {
 }
 
 export function Button() {
-  const background = resolveToken(tokenMap.background);
+  const background = resolveToken("color.primary");
 
   return (
     <button
