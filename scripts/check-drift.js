@@ -124,7 +124,10 @@ function scan(dir) {
       const match = content.match(/className="([^"]+)"/);
 
       if (match) {
-        const classes = match[1].split(/\s+/);
+        const classes = match[1]
+  .split(/\s+/)
+  .map((c) => c.trim())
+  .filter(Boolean);
 
         const componentName = path.basename(path.dirname(full));
         const contractPath = `./components/${componentName}/${componentName}.tokens.json`;
