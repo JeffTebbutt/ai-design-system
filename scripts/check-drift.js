@@ -2,7 +2,96 @@ const fs = require("fs");
 const path = require("path");
 
 // ----------------------------------------
-// ✅ Enforce: every component has contract
+// Helpers
+// ----------------------------------------
+
+function tokenToTailwindValue(token) {
+  if (token.startsWith("size.")) {
+    return token.split(".")[1];
+  }
+
+  if (token.startsWith("color.")) {
+    return token.split(".").slice(1).join("-");
+  }
+
+  if (token === "core.border-radius.pill") {
+    return "full";
+  }
+
+  return token.split(".").slice(1).join("-");
+}
+
+function validateEntries(entries, component) {
+  Object.entries(entries).forEach(([key, entry]) => {
+    if (!entry || typeof entry !== "object") {
+      console.error(`Invalid entry "${key}" in ${component}`);
+      process.exit(1);
+    }
+
+    if (!entry.token) {
+      console.error(`Missing token in "${key}" (${component})`);
+      process.exit(1);
+    }
+
+    if (!entry.utility) {
+      console.error(`Missing utility for "${key}" in ${component}`);
+      process.exit(1);
+    }
+
+    const isSizeToken = entry.token.startsWith("size.");
+    const isColorToken = entry.token.startsWith("color.");
+    const isCoreToken = entry.token.startsWith("core.");
+    const isSpaceToken = entry.token.startsWith("space.");
+
+    if (!isSizeToken && !isColorToken && !isCoreToken && !isSpaceToken) {
+      console.error(`Unknown token "${entry.token}" in ${component}`);
+      process.exit(1);
+    }
+  });
+}
+
+function buildAllowedClasses(contract) {
+  const classSet = new Set();
+
+  const addEntries = (entries, prefix = "") => {
+    Object.values(entries || {}).forEach((entry) => {
+      if (!entry.token || !entry.utility) return;
+
+      const value = tokenToTailwindValue(entry.token);
+
+      if (entry.utility.includes(" ")) {
+        entry.utility.split(" ").forEach((u) => {
+          classSet.add(`${prefix}${u}-${value}`);
+        });
+      } else {
+        classSet.add(`${prefix}${entry.utility}-${value}`);
+      }
+    });
+  };
+
+  // Shared
+  addEntries(contract.shared);
+
+  // Variants
+  Object.values(contract.variants || {}).forEach((variant) => {
+    addEntries(variant.default);
+
+    Object.entries(variant).forEach(([state, entries]) => {
+      if (state === "default") return;
+
+      if (state === "hover") {
+        addEntries(entries, "hover:");
+      } else {
+        addEntries(entries);
+      }
+    });
+  });
+
+  return classSet;
+}
+
+// ----------------------------------------
+// Validate contracts
 // ----------------------------------------
 
 const componentDirs = fs.readdirSync("./components");
@@ -16,47 +105,28 @@ componentDirs.forEach((component) => {
   const contractPath = path.join(componentPath, contractFile);
 
   if (!fs.existsSync(contractPath)) {
-    console.error(
-      `Missing token contract: ${component}/${contractFile}`
-    );
+    console.error(`Missing token contract: ${component}/${contractFile}`);
     process.exit(1);
   }
 
-  const tokenContract = JSON.parse(
-    fs.readFileSync(contractPath, "utf8")
-  );
+  const contract = JSON.parse(fs.readFileSync(contractPath, "utf8"));
 
-  // Validate contract entries
-  Object.entries(tokenContract).forEach(([key, entry]) => {
-    if (!entry.token) {
-      console.error(`Missing token in "${key}" (${component})`);
-      process.exit(1);
-    }
+  // Validate shared
+  validateEntries(contract.shared || {}, component);
 
-    if (!entry.utility) {
-      console.error(
-        `Missing utility for "${key}" in ${component}`
-      );
-      process.exit(1);
-    }
+  // Validate variants
+  Object.values(contract.variants || {}).forEach((variant) => {
+    validateEntries(variant.default || {}, component);
 
-    // Allow both semantic and core tokens
-    const isSizeToken = entry.token.startsWith("size.");
-const isColorToken = entry.token.startsWith("color.");
-const isCoreToken = entry.token.startsWith("core.");
-const isSpaceToken = entry.token.startsWith("space."); // ✅ ADD THIS
-
-if (!isSizeToken && !isColorToken && !isCoreToken && !isSpaceToken) {
-      console.error(
-        `Unknown token "${entry.token}" in ${component}`
-      );
-      process.exit(1);
-    }
+    Object.entries(variant).forEach(([state, entries]) => {
+      if (state === "default") return;
+      validateEntries(entries || {}, component);
+    });
   });
 });
 
 // ----------------------------------------
-// 🔍 Scan component files
+// Scan component files
 // ----------------------------------------
 
 function scan(dir) {
@@ -96,7 +166,7 @@ function scan(dir) {
       }
 
       // ----------------------------------------
-      // ✅ Strict class ↔ contract validation
+      // Validate class usage
       // ----------------------------------------
 
       const match = content.match(/className="([^"]+)"/);
@@ -110,51 +180,14 @@ function scan(dir) {
         const componentName = path.basename(path.dirname(full));
         const contractPath = `./components/${componentName}/${componentName}.tokens.json`;
 
-        const tokenContract = JSON.parse(
+        const contract = JSON.parse(
           fs.readFileSync(contractPath, "utf8")
         );
 
-        // Build allowed classes from contract
-        const allowedClasses = [];
+        const allowedClasses = buildAllowedClasses(contract);
 
-        Object.values(tokenContract).forEach((entry) => {
-          const { token, utility } = entry;
-
-          if (!token || !utility) return;
-
-          let value;
-
-          // size tokens
-          if (token.startsWith("size.")) {
-            value = token.split(".")[1];
-          }
-
-          // color tokens
-          else if (token.startsWith("color.")) {
-            value = token.split(".").slice(1).join("-");
-          }
-
-          // radius tokens
-          else if (token === "core.border-radius.pill") {
-            value = "full";
-          }
-
-          else {
-            value = token.split(".").slice(1).join("-");
-          }
-
-          if (utility.includes(" ")) {
-            utility.split(" ").forEach((u) => {
-              allowedClasses.push(`${u}-${value}`);
-            });
-          } else {
-            allowedClasses.push(`${utility}-${value}`);
-          }
-        });
-
-        // Validate actual classes
         classes.forEach((cls) => {
-          if (!allowedClasses.includes(cls)) {
+          if (!allowedClasses.has(cls)) {
             console.error(
               `Class "${cls}" not defined in token contract (${componentName})`
             );
