@@ -1,0 +1,18 @@
+name: Validate Design System
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: npm install
+      - run: node scripts/validate-tokens.js
+      - run: node scripts/check-drift.js
