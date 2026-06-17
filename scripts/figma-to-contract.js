@@ -110,9 +110,9 @@ const figmaData = {
   paddingLeft: node.styles?.layout?.padding?.[1],
   paddingRight: node.styles?.layout?.padding?.[3],
   height: node.size?.h,
-  minWidth:
+minWidth:
   node.styles?.layout?.minWidth ??
-  node.size?.w,
+  node.styles?.layout?.padding?.[1] * 2, // fallback detection (optional)
   radius: node.styles?.radius
 };
 
