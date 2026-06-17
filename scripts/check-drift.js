@@ -61,12 +61,18 @@ componentDirs.forEach((component) => {
       process.exit(1);
     }
 
-    if (!mapping.tokenToValue[entry.token]) {
-      console.error(
-        `Unknown token "${entry.token}" in ${component}`
-      );
-      process.exit(1);
-    }
+    // Allow both core tokens AND size aliases
+const isCoreToken = mapping.tokenToValue[entry.token];
+
+// Allow size.* tokens
+const isSizeToken = entry.token.startsWith("size.");
+
+if (!isCoreToken && !isSizeToken) {
+  console.error(
+    `Unknown token "${entry.token}" in ${component}`
+  );
+  process.exit(1);
+}
 
     if (!entry.utility) {
       console.error(
