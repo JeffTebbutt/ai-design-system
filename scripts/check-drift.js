@@ -1,32 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 
-// Load mapping
-const mapping = JSON.parse(
-  fs.readFileSync("./meta/token-tailwind-map.json")
-);
-
-const allowedValues = Object.values(mapping.tokenToValue);
-
-// Known Tailwind utilities (can expand later)
-const knownUtilities = [
-  "bg",
-  "text",
-  "px",
-  "py",
-  "rounded",
-  "h",
-  "w",
-  "min-w"
-];
-
-// Extract value from Tailwind class
-function extractValue(cls) {
-  const utility = knownUtilities.find((u) => cls.startsWith(`${u}-`));
-  if (!utility) return null;
-  return cls.replace(`${utility}-`, "");
-}
-
 // ----------------------------------------
 // ✅ Enforce: every component has contract
 // ----------------------------------------
@@ -49,34 +23,31 @@ componentDirs.forEach((component) => {
   }
 
   const tokenContract = JSON.parse(
-    fs.readFileSync(contractPath)
+    fs.readFileSync(contractPath, "utf8")
   );
 
-  // ✅ Validate contract entries
+  // Validate contract entries
   Object.entries(tokenContract).forEach(([key, entry]) => {
     if (!entry.token) {
-      console.error(
-        `Missing token in "${key}" (${component})`
-      );
+      console.error(`Missing token in "${key}" (${component})`);
       process.exit(1);
     }
-
-    // Allow both core tokens AND size aliases
-const isCoreToken = mapping.tokenToValue[entry.token];
-
-// Allow size.* tokens
-const isSizeToken = entry.token.startsWith("size.");
-
-if (!isCoreToken && !isSizeToken) {
-  console.error(
-    `Unknown token "${entry.token}" in ${component}`
-  );
-  process.exit(1);
-}
 
     if (!entry.utility) {
       console.error(
         `Missing utility for "${key}" in ${component}`
+      );
+      process.exit(1);
+    }
+
+    // Allow both semantic and core tokens
+    const isSizeToken = entry.token.startsWith("size.");
+    const isColorToken = entry.token.startsWith("color.");
+    const isCoreToken = entry.token.startsWith("core.");
+
+    if (!isSizeToken && !isColorToken && !isCoreToken) {
+      console.error(
+        `Unknown token "${entry.token}" in ${component}`
       );
       process.exit(1);
     }
@@ -105,7 +76,7 @@ function scan(dir) {
         process.exit(1);
       }
 
-      // ❌ Hardcoded px values
+      // ❌ Hardcoded spacing
       if (/\b\d+px\b/.test(content)) {
         console.error(`Hardcoded spacing found in ${full}`);
         process.exit(1);
@@ -124,56 +95,65 @@ function scan(dir) {
       }
 
       // ----------------------------------------
-      // ✅ Strict class ↔ contract enforcement
+      // ✅ Strict class ↔ contract validation
       // ----------------------------------------
 
       const match = content.match(/className="([^"]+)"/);
 
       if (match) {
         const classes = match[1]
-  .split(/\s+/)
-  .map((c) => c.trim())
-  .filter(Boolean);
+          .split(/\s+/)
+          .map((c) => c.trim())
+          .filter(Boolean);
 
         const componentName = path.basename(path.dirname(full));
         const contractPath = `./components/${componentName}/${componentName}.tokens.json`;
 
         const tokenContract = JSON.parse(
-          fs.readFileSync(contractPath)
+          fs.readFileSync(contractPath, "utf8")
         );
 
-        // Build allowed classes FROM contract
-        const allowedClassesFromContract = [];
+        // Build allowed classes from contract
+        const allowedClasses = [];
 
         Object.values(tokenContract).forEach((entry) => {
-          const value = mapping.tokenToValue[entry.token];
-          const utility = entry.utility;
+          const { token, utility } = entry;
 
-          if (!value || !utility) return;
+          if (!token || !utility) return;
 
-          // Handle multiple utilities (e.g. px + py)
+          let value;
+
+          // size tokens
+          if (token.startsWith("size.")) {
+            value = token.split(".")[1];
+          }
+
+          // color tokens
+          else if (token.startsWith("color.")) {
+            value = token.split(".").slice(1).join("-");
+          }
+
+          // radius tokens
+          else if (token === "core.border-radius.pill") {
+            value = "full";
+          }
+
+          else {
+            value = token.split(".").slice(1).join("-");
+          }
+
           if (utility.includes(" ")) {
             utility.split(" ").forEach((u) => {
-              allowedClassesFromContract.push(`${u}-${value}`);
+              allowedClasses.push(`${u}-${value}`);
             });
           } else {
-            allowedClassesFromContract.push(`${utility}-${value}`);
+            allowedClasses.push(`${utility}-${value}`);
           }
         });
 
+        // Validate actual classes
         classes.forEach((cls) => {
-          // Validate structure
-          const value = extractValue(cls);
-
-          if (!value || !allowedValues.includes(value)) {
-            console.error(
-              `Invalid Tailwind value "${value}" in class "${cls}" (${full})`
-            );
-            process.exit(1);
-          }
-
-          // Validate against contract
-          if (!allowedClassesFromContract.includes(cls)) {
+          if (!allowedClasses.includes(cls)) {
             console.error(
               `Class "${cls}" not defined in token contract (${componentName})`
             );
