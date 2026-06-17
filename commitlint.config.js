@@ -16,7 +16,8 @@ module.exports = {
         "generator",
         "validation",
         "runtime",
-        "preview"
+        "preview",
+        "tooling"
       ]
     ],
     "subject-case": [0]
