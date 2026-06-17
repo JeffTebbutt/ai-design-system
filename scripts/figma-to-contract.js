@@ -106,7 +106,9 @@ const figmaData = {
   paddingLeft: node.styles?.layout?.padding?.[1],
   paddingRight: node.styles?.layout?.padding?.[3],
   height: node.size?.h,
-  minWidth: node.styles?.layout?.minWidth ?? node.size?.w,
+  minWidth:
+  node.styles?.layout?.minWidth ??
+  80, // 🔥 enforce token fallback
   radius: node.styles?.radius
 };
 
