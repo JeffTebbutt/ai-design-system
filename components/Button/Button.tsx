@@ -1,19 +1,15 @@
-// @ts-nocheck
-import tokens from "../../tokens/tokens.json";
-import tokenMap from "./Button.tokens.json";
-
-function resolveToken(name: string) {
-  return (tokens as any[]).find((t) => t.name === name)?.value;
-}
-
 export function Button() {
-  const background = resolveToken(tokenMap.background);
-
   return (
     <button
-      style={{
-        backgroundColor: background,
-      }}
+      className="
+        bg-surface-primary
+        text-on-surface-primary
+        px-large
+        py-large
+        rounded-full
+        h-300
+        min-w-500
+      "
     >
       Button
     </button>
