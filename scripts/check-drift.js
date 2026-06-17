@@ -24,6 +24,13 @@ function scan(dir) {
         console.error(`Hardcoded spacing found in ${full}`);
         process.exit(1);
       }
+
+      // Detect inline token usage like resolveToken("...")
+if (/resolveToken\(["'`].+["'`]\)/.test(content)) {
+  console.error(`Inline token usage detected in ${full}`);
+  process.exit(1);
+}
+
     }
   });
 }
