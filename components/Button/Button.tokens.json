@@ -3,13 +3,6 @@
     "token": "color.surface.primary",
     "utility": "bg"
   },
-
-  "hover": {
-  "background": {
-    "token": "color.surface.primary-weak",
-    "utility": "bg"
-  }
-},
   "text": {
     "token": "color.on-surface.primary",
     "utility": "text"
