@@ -21,66 +21,96 @@ try {
 // Token → Tailwind value mapping
 // -----------------------------
 function tokenToTailwindValue(token) {
-  // size tokens (size.7xl → 7xl)
   if (token.startsWith("size.")) {
     return token.split(".")[1];
   }
 
-  // color tokens (color.surface.primary → surface-primary)
   if (token.startsWith("color.")) {
-    const parts = token.split(".");
-    return parts.slice(1).join("-");
+    return token.split(".").slice(1).join("-");
   }
 
-  // radius tokens
   if (token === "core.border-radius.pill") {
     return "full";
   }
 
-  // fallback (rare)
   return token.split(".").slice(1).join("-");
 }
 
 // -----------------------------
-// Build Tailwind classes
+// Build classes from contract
 // -----------------------------
-const classSet = new Set();
+function buildClasses({ shared, variant, state }) {
+  const classSet = new Set();
 
-Object.values(contract).forEach((entry) => {
-  const { token, utility } = entry;
+  // 1. Shared styles
+  Object.values(shared || {}).forEach((entry) => {
+    const { token, utility } = entry;
+    if (!token || !utility) return;
 
-  if (!token || !utility) return;
+    const value = tokenToTailwindValue(token);
 
-  const value = tokenToTailwindValue(token);
+    if (utility.includes(" ")) {
+      utility.split(" ").forEach((u) => {
+        classSet.add(`${u}-${value}`);
+      });
+    } else {
+      classSet.add(`${utility}-${value}`);
+    }
+  });
 
-  // Handle multiple utilities (e.g. "px py")
-  if (utility.includes(" ")) {
-    utility.split(" ").forEach((u) => {
-      classSet.add(`${u}-${value}`);
-    });
-  } else {
+  // 2. Variant default
+  const variantDefault = variant?.default || {};
+  Object.values(variantDefault).forEach((entry) => {
+    const { token, utility } = entry;
+    if (!token || !utility) return;
+
+    const value = tokenToTailwindValue(token);
     classSet.add(`${utility}-${value}`);
-  }
+  });
+
+  // 3. Variant state (hover, disabled, etc.)
+  const variantState = variant?.[state] || {};
+  Object.values(variantState).forEach((entry) => {
+    const { token, utility } = entry;
+    if (!token || !utility) return;
+
+    const value = tokenToTailwindValue(token);
+
+    if (state === "hover") {
+      classSet.add(`hover:${utility}-${value}`);
+    } else if (state === "disabled") {
+      classSet.add(`${utility}-${value}`);
+    } else {
+      classSet.add(`${utility}-${value}`);
+    }
+  });
+
+  return Array.from(classSet).join(" ");
+}
+
+// -----------------------------
+// Generate Button component
+// -----------------------------
+const primaryVariant = contract.variants?.primary;
+
+const classString = buildClasses({
+  shared: contract.shared,
+  variant: primaryVariant,
+  state: "hover" // change to test states
 });
 
-const classes = Array.from(classSet);
-const classString = classes.join(" ");
-
 // -----------------------------
-// Build component
+// Output component
 // -----------------------------
-const componentCode = `export function Button() {
+const componentCode = `export function Button({ children }) {
   return (
     <button className="${classString}">
-      Button
+      {children}
     </button>
   );
 }
 `;
 
-// -----------------------------
-// Write file
-// -----------------------------
 const outputPath = path.join("./components/Button/Button.tsx");
 
 fs.writeFileSync(outputPath, componentCode);
