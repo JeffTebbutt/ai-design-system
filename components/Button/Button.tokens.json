@@ -1,5 +1,8 @@
 {
-  "background": "color.primary",
-  "text": "color.onPrimary",
-  "padding": "spacing.md"
+  "background": "color.surface.primary",
+  "text": "color.on-surface.primary",
+  "padding": "space.large",
+  "radius": "core.border-radius.pill",
+  "height": "core.dimension.300",
+  "minWidth": "core.dimension.500"
 }
