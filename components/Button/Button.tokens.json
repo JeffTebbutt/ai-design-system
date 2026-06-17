@@ -7,20 +7,20 @@
     "token": "color.on-surface.primary",
     "utility": "text"
   },
-  "paddingX": {
-  "token": "space.large",
-  "utility": "px"
-},
-"paddingY": {
-  "token": "space.large",
-  "utility": "py"
-},
+  "paddingLeft": {
+    "token": "space.large",
+    "utility": "px"
+  },
+  "paddingRight": {
+    "token": "space.large",
+    "utility": "px"
+  },
   "height": {
-    "token": "core.dimension.300",
+    "token": "size.7xl",
     "utility": "h"
   },
   "minWidth": {
-    "token": "core.dimension.500",
+    "token": "size.7xl",
     "utility": "min-w"
   },
   "radius": {
