@@ -42,14 +42,14 @@ function tokenToTailwindValue(token) {
 function buildClasses({ shared, variant, state }) {
   const classSet = new Set();
 
-  // 1. Shared styles
+  // Shared
   Object.values(shared || {}).forEach((entry) => {
     const { token, utility } = entry;
     if (!token || !utility) return;
 
     const value = tokenToTailwindValue(token);
 
-    if (utility.includes(" ")) {
+    if (typeof utility === "string" && utility.includes(" ")) {
       utility.split(" ").forEach((u) => {
         classSet.add(`${u}-${value}`);
       });
@@ -58,7 +58,7 @@ function buildClasses({ shared, variant, state }) {
     }
   });
 
-  // 2. Variant default
+  // Variant default
   const variantDefault = variant?.default || {};
   Object.values(variantDefault).forEach((entry) => {
     const { token, utility } = entry;
@@ -68,7 +68,7 @@ function buildClasses({ shared, variant, state }) {
     classSet.add(`${utility}-${value}`);
   });
 
-  // 3. Variant state (hover, disabled, etc.)
+  // Variant state
   const variantState = variant?.[state] || {};
   Object.values(variantState).forEach((entry) => {
     const { token, utility } = entry;
@@ -80,6 +80,8 @@ function buildClasses({ shared, variant, state }) {
       classSet.add(`hover:${utility}-${value}`);
     } else if (state === "disabled") {
       classSet.add(`${utility}-${value}`);
+      classSet.add("opacity-50");
+      classSet.add("cursor-not-allowed");
     } else {
       classSet.add(`${utility}-${value}`);
     }
@@ -93,16 +95,27 @@ function buildClasses({ shared, variant, state }) {
 // -----------------------------
 const primaryVariant = contract.variants?.primary;
 
+if (!primaryVariant) {
+  console.error("❌ Missing 'primary' variant in contract");
+  process.exit(1);
+}
+
 const classString = buildClasses({
   shared: contract.shared,
   variant: primaryVariant,
-  state: "hover" // change to test states
+  state: "hover"
 });
 
 // -----------------------------
 // Output component
 // -----------------------------
-const componentCode = `export function Button({ children }) {
+const componentCode = `import { ReactNode } from "react";
+
+type ButtonProps = {
+  children: ReactNode;
+};
+
+export function Button({ children }: ButtonProps) {
   return (
     <button className="${classString}">
       {children}
