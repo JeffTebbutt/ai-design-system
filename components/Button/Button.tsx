@@ -1,16 +1,6 @@
 export function Button() {
   return (
-    <button
-      className="
-        bg-surface-primary
-        text-on-surface-primary
-        px-large
-        py-large
-        rounded-full
-        h-300
-        min-w-500
-      "
-    >
+    <button className="bg-surface-primary text-on-surface-primary px-large h-7xl min-w-7xl rounded-full">
       Button
     </button>
   );

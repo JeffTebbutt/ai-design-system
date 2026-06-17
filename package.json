@@ -2,8 +2,9 @@
   "name": "ai-design-system",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@types/react": "^19.2.17",
-    "react": "^19.2.7"
+  "scripts": {
+    "generate": "node scripts/figma-to-contract.js && node scripts/contract-to-component.js",
+    "check": "node scripts/check-drift.js",
+    "build": "npm run generate && npm run check"
   }
 }
