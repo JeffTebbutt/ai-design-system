@@ -1,0 +1,18 @@
+{
+  "tokenToValue": {
+    "color.surface.primary": "surface-primary",
+    "color.on-surface.primary": "on-surface-primary",
+    "space.large": "large",
+    "core.border-radius.pill": "full",
+    "core.dimension.300": "300",
+    "core.dimension.500": "500"
+  },
+  "valueToToken": {
+    "surface-primary": "color.surface.primary",
+    "on-surface-primary": "color.on-surface.primary",
+    "large": "space.large",
+    "full": "core.border-radius.pill",
+    "300": "core.dimension.300",
+    "500": "core.dimension.500"
+  }
+}
