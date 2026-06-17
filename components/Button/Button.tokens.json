@@ -7,14 +7,14 @@
     "token": "color.on-surface.primary",
     "utility": "text"
   },
-  "paddingLeft": {
-    "token": "space.large",
-    "utility": "px"
-  },
-  "paddingRight": {
-    "token": "space.large",
-    "utility": "px"
-  },
+  "paddingX": {
+  "token": "space.large",
+  "utility": "px"
+},
+"paddingY": {
+  "token": "space.large",
+  "utility": "py"
+},
   "height": {
     "token": "core.dimension.300",
     "utility": "h"
