@@ -1,0 +1,5 @@
+{
+  "background": "color.primary",
+  "text": "color.onPrimary",
+  "padding": "spacing.md"
+}
