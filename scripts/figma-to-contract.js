@@ -173,10 +173,32 @@ Object.entries(figmaData).forEach(([key, value]) => {
 
   console.log(`✔ Mapping ${key}: ${value} → ${token} (${utility})`);
 
-  contract[key] = {
-    token,
-    utility
-  };
+  const contract = {
+  shared: {
+    paddingX: {
+      token: "space.large",
+      utility: "px"
+    },
+    height: {
+      token: null,
+      utility: "h"
+    },
+    minWidth: {
+      token: null,
+      utility: "min-w"
+    },
+    radius: {
+      token: null,
+      utility: "rounded"
+    }
+  },
+  variants: {
+    primary: {
+      default: {},
+      hover: {}
+    }
+  }
+};
 });
 
 // -----------------------------
