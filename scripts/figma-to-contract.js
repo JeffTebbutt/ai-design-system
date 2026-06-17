@@ -4,7 +4,7 @@ const path = require("path");
 console.log("🔄 Running Figma → contract transformation...");
 
 // -----------------------------
-// ✅ Safe token loading
+// Load tokens safely
 // -----------------------------
 let tokens;
 
@@ -23,17 +23,16 @@ try {
 }
 
 // -----------------------------
-// Build lookup: value → token
+// Build value → token lookup
 // -----------------------------
 const valueToToken = {};
 
 tokens.forEach((t) => {
-  const key = String(t.value).toLowerCase();
-  valueToToken[key] = t.name;
+  valueToToken[String(t.value).toLowerCase()] = t.name;
 });
 
 // -----------------------------
-// Core dimension → size alias
+// Core → size alias mapping
 // -----------------------------
 const coreToSizeAlias = {
   "core.dimension.12": "3xs",
@@ -64,7 +63,7 @@ const coreToSizeAlias = {
 };
 
 // -----------------------------
-// RGB → HEX helper
+// RGB → HEX
 // -----------------------------
 function rgbToHex(rgb) {
   const match = rgb.match(/\d+/g);
@@ -72,14 +71,12 @@ function rgbToHex(rgb) {
 
   return (
     "#" +
-    match
-      .map((x) => parseInt(x).toString(16).padStart(2, "0"))
-      .join("")
+    match.map((x) => parseInt(x).toString(16).padStart(2, "0")).join("")
   );
 }
 
 // -----------------------------
-// Load MCP output
+// Load MCP JSON
 // -----------------------------
 let figmaRaw;
 
@@ -93,7 +90,6 @@ try {
   process.exit(1);
 }
 
-// Your MCP format = direct object
 const node = figmaRaw.structure;
 
 if (!node) {
@@ -102,7 +98,7 @@ if (!node) {
 }
 
 // -----------------------------
-// Normalize MCP → flat structure
+// Extract values from MCP
 // -----------------------------
 const figmaData = {
   background: node.styles?.bg,
@@ -110,13 +106,11 @@ const figmaData = {
   paddingLeft: node.styles?.layout?.padding?.[1],
   paddingRight: node.styles?.layout?.padding?.[3],
   height: node.size?.h,
-minWidth:
-  node.styles?.layout?.minWidth ??
-  node.styles?.layout?.padding?.[1] * 2, // fallback detection (optional)
+  minWidth: node.styles?.layout?.minWidth ?? node.size?.w,
   radius: node.styles?.radius
 };
 
-// Validate extracted values
+// Validate
 Object.entries(figmaData).forEach(([key, value]) => {
   if (value === undefined || value === null) {
     console.error(`❌ Missing Figma value for "${key}"`);
@@ -125,55 +119,9 @@ Object.entries(figmaData).forEach(([key, value]) => {
 });
 
 // -----------------------------
-// Property → utility mapping
+// Initialize contract (NEW STRUCTURE)
 // -----------------------------
-const propertyMap = {
-  background: "bg",
-  text: "text",
-  paddingLeft: "px",
-  paddingRight: "px",
-  height: "h",
-  minWidth: "min-w",
-  radius: "rounded"
-};
-
-// -----------------------------
-// Transform MCP → token contract
-// -----------------------------
-const contract = {};
-
-Object.entries(figmaData).forEach(([key, value]) => {
-  let normalizedValue = value;
-
-  // Convert rgb(...) → hex
-  if (typeof value === "string" && value.startsWith("rgb")) {
-    normalizedValue = rgbToHex(value);
-  }
-
-  normalizedValue = String(normalizedValue).toLowerCase();
-
-  const coreToken = valueToToken[normalizedValue];
-
-  if (!coreToken) {
-    console.error(`❌ No token found for value: ${value} (${key})`);
-    process.exit(1);
-  }
-
-  // Resolve semantic alias
-  const alias = coreToSizeAlias[coreToken];
-
-  const token = alias ? `size.${alias}` : coreToken;
-
-  const utility = propertyMap[key];
-
-  if (!utility) {
-    console.warn(`⚠️ No utility mapping for "${key}" — skipping`);
-    return;
-  }
-
-  console.log(`✔ Mapping ${key}: ${value} → ${token} (${utility})`);
-
-  const contract = {
+const contract = {
   shared: {
     paddingX: {
       token: "space.large",
@@ -199,6 +147,65 @@ Object.entries(figmaData).forEach(([key, value]) => {
     }
   }
 };
+
+// -----------------------------
+// Map values → tokens → contract
+// -----------------------------
+Object.entries(figmaData).forEach(([key, value]) => {
+  let normalizedValue = value;
+
+  if (typeof value === "string" && value.startsWith("rgb")) {
+    normalizedValue = rgbToHex(value);
+  }
+
+  normalizedValue = String(normalizedValue).toLowerCase();
+
+  const coreToken = valueToToken[normalizedValue];
+
+  if (!coreToken) {
+    console.error(`❌ No token found for value: ${value} (${key})`);
+    process.exit(1);
+  }
+
+  const alias = coreToSizeAlias[coreToken];
+  const token = alias ? `size.${alias}` : coreToken;
+
+  console.log(`✔ Mapping ${key}: ${value} → ${token}`);
+
+  // -----------------------------
+  // Assign correctly
+  // -----------------------------
+  if (key === "background") {
+    contract.variants.primary.default.background = {
+      token,
+      utility: "bg"
+    };
+
+    // hover uses semantic weaker token
+    contract.variants.primary.hover.background = {
+      token: "color.surface.primary-weak",
+      utility: "bg"
+    };
+  }
+
+  if (key === "text") {
+    contract.variants.primary.default.text = {
+      token,
+      utility: "text"
+    };
+  }
+
+  if (key === "height") {
+    contract.shared.height.token = token;
+  }
+
+  if (key === "minWidth") {
+    contract.shared.minWidth.token = token;
+  }
+
+  if (key === "radius") {
+    contract.shared.radius.token = token;
+  }
 });
 
 // -----------------------------
