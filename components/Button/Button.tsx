@@ -11,7 +11,7 @@ export function Button() {
   return (
     <button
       style={{
-        backgroundColor: "#000000",
+        backgroundColor: background,
       }}
     >
       Button
