@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "extend": {
+      "colors": {
+        "surface-primary": "#1b7c53",
+        "on-surface-primary": "#ffffff",
+        "surface-primary-weak": "#00A45F"
+      },
+      "spacing": {
+        "large": "24px"
+      },
+      "borderRadius": {
+        "full": "1000px"
+      },
+      "height": {
+        "7xl": "48px",
+        "9xl": "80px",
+        "11xl": "100px",
+        "12xl": "120px"
+      },
+      "minWidth": {
+        "7xl": "48px",
+        "9xl": "80px",
+        "11xl": "100px",
+        "12xl": "120px"
+      }
+    }
+  }
+}

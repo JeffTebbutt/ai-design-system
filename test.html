@@ -2,44 +2,47 @@
 <html>
   <head>
     <script src="https://cdn.tailwindcss.com"></script>
-<style>
-  body {
-    font-family: "Euclid Circular A", sans-serif;
-  }
-</style>
+
+    <!-- Font -->
+    <style>
+      body {
+        font-family: "Euclid Circular A", sans-serif;
+      }
+    </style>
+
+    <!-- Load generated Tailwind config -->
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-  "surface-primary": "#1b7c53",
-  "surface-primary-weak": "#166a47",
-  "on-surface-primary": "#ffffff"
-},
-            spacing: {
-              "large": "24px"
-            },
-            borderRadius: {
-              "full": "1000px"
-            },
-            height: {
-              "7xl": "48px"
-            },
-            minWidth: {
-              "7xl": "48px",
-              "9xl": "80px"
-            }
-          }
-        }
-      };
+      fetch("../meta/tailwind.generated.json")
+        .then((res) => res.json())
+        .then((config) => {
+          tailwind.config = config;
+        })
+        .catch((err) => {
+          console.error("❌ Failed to load Tailwind config", err);
+        });
     </script>
   </head>
 
-  <body class="p-10">
+  <body class="p-10 space-x-4">
+    <!-- Default state -->
     <button
-      class="bg-surface-primary text-on-surface-primary px-large h-7xl min-w-9xl rounded-full"
+      class="px-large h-7xl min-w-9xl rounded-full bg-surface-primary text-on-surface-primary"
     >
-      Button
+      Default
+    </button>
+
+    <!-- Hover state preview (forced) -->
+    <button
+      class="px-large h-7xl min-w-9xl rounded-full bg-surface-primary-weak text-on-surface-primary"
+    >
+      Hover
+    </button>
+
+    <!-- Real hover interaction -->
+    <button
+      class="px-large h-7xl min-w-9xl rounded-full bg-surface-primary text-on-surface-primary hover:bg-surface-primary-weak"
+    >
+      Hover (interactive)
     </button>
   </body>
 </html>
