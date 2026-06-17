@@ -1,8 +1,30 @@
 {
-  "background": "color.surface.primary",
-  "text": "color.on-surface.primary",
-  "padding": "space.large",
-  "radius": "core.border-radius.pill",
-  "height": "core.dimension.300",
-  "minWidth": "core.dimension.500"
+  "background": {
+    "token": "color.surface.primary",
+    "utility": "bg"
+  },
+  "text": {
+    "token": "color.on-surface.primary",
+    "utility": "text"
+  },
+  "paddingX": {
+    "token": "space.large",
+    "utility": "px"
+  },
+  "paddingY": {
+    "token": "space.large",
+    "utility": "py"
+  },
+  "radius": {
+    "token": "core.border-radius.pill",
+    "utility": "rounded"
+  },
+  "height": {
+    "token": "core.dimension.300",
+    "utility": "h"
+  },
+  "minWidth": {
+    "token": "core.dimension.500",
+    "utility": "min-w"
+  }
 }
