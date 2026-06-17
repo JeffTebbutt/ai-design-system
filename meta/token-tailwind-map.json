@@ -4,15 +4,19 @@
     "color.on-surface.primary": "on-surface-primary",
     "space.large": "large",
     "core.border-radius.pill": "full",
-    "core.dimension.300": "300",
-    "core.dimension.500": "500"
+    "core.dimension.300": "7xl",
+     "core.dimension.400": "9xl",
+    "core.dimension.500": "11xl",
+    "core.dimension.600": "12xl"
   },
   "valueToToken": {
     "surface-primary": "color.surface.primary",
     "on-surface-primary": "color.on-surface.primary",
     "large": "space.large",
     "full": "core.border-radius.pill",
-    "300": "core.dimension.300",
-    "500": "core.dimension.500"
+    "7xl": "core.dimension.300",
+    "9xl": "core.dimension.400",
+    "11xl": "core.dimension.500",
+    "12xl": "core.dimension.600"
   }
 }
